@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MathQuest X | משחק למידה מתמטי לכיתה י'</title>
+    
+    <!-- Google Fonts - Rubik -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Rubik:ital,wght@0,300..900;1,300..900&display=swap" rel="stylesheet">
+    
+    <!-- KaTeX for high-end LaTeX math rendering (Offline-First Local Files) -->
+    <link rel="stylesheet" href="assets/lib/katex/katex.min.css">
+    <script defer src="assets/lib/katex/katex.min.js"></script>
+    <script defer src="assets/lib/katex/contrib/auto-render.min.js" onload="if (typeof renderMathInElement === 'function') { renderMathInElement(document.body); }"></script>
+
+    <!-- Canvas Confetti for celebratory success feedback -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <div class="app-container">
+        
+        <!-- ================= HEADER / STATUS BAR ================= -->
+        <header class="app-header glass-card">
+            <div class="header-right">
+                <div class="logo">
+                    <span class="logo-accent">MATH</span>QUEST<span class="logo-grade">X</span>
+                </div>
+            </div>
+            
+            <div class="header-center">
+                <!-- Navigation Tabs (Only active in map or dashboard) -->
+                <nav class="nav-tabs">
+                    <button class="nav-btn active" data-target="screen-map">
+                        <i data-lucide="map" class="nav-icon"></i>
+                        <span>מפת מסע</span>
+                    </button>
+                    <button class="nav-btn" data-target="screen-practice">
+                        <i data-lucide="dumbbell" class="nav-icon"></i>
+                        <span>אימון חופשי</span>
+                    </button>
+                    <button class="nav-btn" data-target="screen-leaderboard">
+                        <i data-lucide="trophy" class="nav-icon"></i>
+                        <span>לוח מובילים</span>
+                    </button>
+                </nav>
+            </div>
+
+            <div class="header-left">
+                <!-- Unlocked Badges display -->
+                <div id="badges-container" style="margin-inline-end: 16px;"></div>
+
+                <!-- User Stats Tracker -->
+                <div class="stats-tracker">
+                    <div class="stat-badge streak-badge" title="רצף ימים">
+                        <i data-lucide="flame" class="icon-fire animate-pulse"></i>
+                        <span class="stat-value" id="streak-display">0</span>
+                    </div>
+                    <div class="stat-badge xp-badge" title="נקודות ניסיון (XP)">
+                        <i data-lucide="star" class="icon-star"></i>
+                        <span class="stat-value" id="xp-display">0 XP</span>
+                    </div>
+                    <div class="stat-badge stars-badge" title="כוכבים">
+                        <i data-lucide="award" class="icon-star" style="color: var(--accent-cyan); fill: var(--accent-cyan);"></i>
+                        <span class="stat-value" id="stars-display">0</span>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- ================= SCREEN 1: MAP / LEVEL SELECT ================= -->
+        <main id="screen-map" class="screen active">
+            <div class="map-layout">
+                <div class="map-content">
+                    <div class="screen-title-container" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+                        <div>
+                            <h1 class="screen-title">מפת הלמידה של כיתה י'</h1>
+                            <p class="screen-subtitle">בחר נושא והתחל לצבור נקודות ניסיון ואותות גבורה</p>
+                        </div>
+                        <div>
+                            <select id="world-select" class="glass-select" style="background: rgba(22, 17, 35, 0.8); color: white; border: 1px solid rgba(255,255,255,0.15); padding: 8px 16px; border-radius: 8px; cursor: pointer; outline: none;">
+                                <option value="world_1">עולם 1: נגזרות של פונקציית שורש</option>
+                                <option value="world_2">עולם 2: משיקים ופרמטרים</option>
+                                <option value="world_3">עולם 3: חקירה מלאה של פונקציות</option>
+                                <option value="world_4">עולם 4: טרנספורמציות ונגזרות</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Welcome Guide Panel -->
+                    <div class="welcome-guide-panel glass-card">
+                        <div class="welcome-guide-header">
+                            <h3>
+                                <i data-lucide="info"></i>
+                                <span>ברוכים הבאים ל-MathQuest X! 🚀</span>
+                            </h3>
+                            <button id="btn-toggle-welcome" class="btn-icon" title="הצג/הסתר הנחיות">הסתר הנחיות</button>
+                        </div>
+                        <div id="welcome-guide-body">
+                            <div class="guide-col">
+                                <h4>
+                                    <i data-lucide="compass"></i>
+                                    <span>מה מצפה לנו במערכת?</span>
+                                </h4>
+                                <ul>
+                                    <li>🗺️ <strong>4 עולמות למידה:</strong> חקירת חדו"א כיתה י' דרך מפות מסע, משורש ועד טרנספורמציות.</li>
+                                    <li>📈 <strong>המחשות אינטראקטיביות:</strong> מערכת צירים דינמית המציגה גרפים מותאמים לכל שאלה.</li>
+                                    <li>🏆 <strong>משחוק והתקדמות:</strong> צבירת נקודות ניסיון (XP), כוכבים, שימור רצף יומי (Streak) ופתיחת תגים.</li>
+                                </ul>
+                            </div>
+                            <div class="guide-col">
+                                <h4>
+                                    <i data-lucide="help-circle"></i>
+                                    <span>הנחיות שימוש מהירות</span>
+                                </h4>
+                                <ul>
+                                    <li>📍 <strong>בחירת שלב:</strong> בחר עולם בתפריט העליון, ולחץ על שלב פעיל (Play זוהר) במפת המסלול.</li>
+                                    <li>💡 <strong>למידה סוקרטית:</strong> שגית? אל דאגה! המערכת לא תגלה את התשובה אלא תציע רמזים מנחים בתיבת הטיפים.</li>
+                                    <li>🎯 <strong>פיצוח עצמי:</strong> השתמש ברמזים, חשב מחדש ונסה לבחור שוב עד שתגיע לפתרון הנכון!</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Glowing Map Path -->
+                    <div class="map-path-container">
+                        <!-- SVG line background connecting nodes -->
+                        <svg class="map-svg-path" width="100%" height="100%" preserveAspectRatio="none">
+                            <defs>
+                                <linearGradient id="path-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                                    <stop offset="0%" stop-color="var(--accent-purple)" />
+                                    <stop offset="50%" stop-color="var(--accent-cyan)" />
+                                    <stop offset="100%" stop-color="var(--accent-success)" />
+                                </linearGradient>
+                                <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+                                    <feGaussianBlur stdDeviation="6" result="blur" />
+                                    <feComposite in="SourceGraphic" in2="blur" operator="over" />
+                                </filter>
+                            </defs>
+                            <path class="glowing-line" d="M 100,80 Q 300,120 500,80 T 900,120 T 700,450 T 300,400 T 150,650 T 500,750 T 850,700" fill="none" stroke="url(#path-gradient)" stroke-width="6" />
+                        </svg>
+
+                        <!-- Level Nodes rendered dynamically -->
+                        <div id="dynamic-nodes-container"></div>
+                    </div>
+                </div>
+
+                <!-- Sidebar Info Panel (Selected Topic Summary) -->
+                <aside class="map-sidebar glass-card">
+                    <div class="sidebar-header">
+                        <div class="badge-accent">נושא נוכחי</div>
+                        <h3 id="sidebar-world-title">טוען...</h3>
+                    </div>
+                    
+                    <div class="progress-details">
+                        <div class="progress-info">
+                            <span>התקדמות כללית בנושא</span>
+                            <span id="sidebar-world-progress-text">0%</span>
+                        </div>
+                        <div class="progress-track">
+                            <div class="progress-fill" id="sidebar-world-progress-fill" style="width: 0%;"></div>
+                        </div>
+                    </div>
+
+                    <div class="topic-objectives">
+                        <h4>שלבי הלמידה:</h4>
+                        <ul class="objectives-list" id="sidebar-objectives-list">
+                            <!-- Populated dynamically -->
+                        </ul>
+                    </div>
+
+                    <div class="sidebar-footer">
+                        <div class="stats-row">
+                            <div class="mini-stat">
+                                <span class="stat-label">מדליות</span>
+                                <span class="stat-val" id="sidebar-medals"><i data-lucide="award" class="color-gold"></i> 0/0</span>
+                            </div>
+                            <div class="mini-stat">
+                                <span class="stat-label">דיוק ממוצע</span>
+                                <span class="stat-val color-green" id="sidebar-accuracy">100%</span>
+                            </div>
+                        </div>
+                        <button class="btn-primary w-full" id="btn-quick-play">
+                            <i data-lucide="zap"></i>
+                            <span>שחק בשלב הנוכחי</span>
+                        </button>
+                    </div>
+                </aside>
+            </div>
+        </main>
+
+        <!-- ================= SCREEN 2: GAMEPLAY SCREEN ================= -->
+        <main id="screen-game" class="screen hidden">
+            <!-- Game Top Status Bar -->
+            <div class="game-status-bar glass-card">
+                <button class="btn-icon" id="btn-exit-game" title="חזרה למפה">
+                    <i data-lucide="arrow-right"></i>
+                </button>
+                
+                <div class="game-info">
+                    <span class="game-level-title">טוען שלב...</span>
+                    <div class="game-progress-container">
+                        <span class="progress-text">שאלה 3 מתוך 10</span>
+                        <div class="progress-track">
+                            <div class="progress-fill" style="width: 30%;"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="game-timers">
+                    <div class="game-timer">
+                        <i data-lucide="clock" class="timer-icon"></i>
+                        <span id="time-counter">02:15</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Two-Column Gameplay Grid -->
+            <div class="gameplay-grid">
+                
+                <!-- Right Column: Visuals & Math Display -->
+                <section class="game-visuals-panel glass-card">
+                    <!-- Interactive / Graphic Sandbox Area -->
+                    <div class="graphic-canvas-wrapper">
+                        <!-- Simulated Interactive Cartesian Coordinate Plane -->
+                        <div class="grid-coordinate-system">
+                            <!-- Background Grid Lines -->
+                            <div class="coord-grid-bg"></div>
+                            
+                            <div class="axis axis-x"></div>
+                            <div class="axis axis-y"></div>
+                            <span class="axis-label x-label">X</span>
+                            <span class="axis-label y-label">Y</span>
+                        </div>
+                    </div>
+                    <div class="question-container">
+                        <div class="question-badge">טוען...</div>
+                        <h2 class="question-text">טוען שאלה, אנא המתן...</h2>
+                    </div>
+                </section>
+
+                <section class="game-answer-panel">
+                    <div class="answer-container active" id="mode-multiple-choice">
+                        <h3 class="answer-instruction">טוען אפשרויות...</h3>
+                        <div class="choices-grid">
+                            <!-- Choice Card 4 -->
+                            <button class="choice-card glass-card" data-key="4" data-correct="false">
+                                <span class="choice-shortcut">4</span>
+                                <span class="choice-math">\(M(-4, -1)\)</span>
+                                <span class="feedback-indicator"></span>
+                            </button>
+
+                        </div>
+                    </div>
+
+                    <!-- ================= CONTAINER TYPE B: NUMERICAL / EXPR INPUT ================= -->
+                    <div class="answer-container hidden" id="mode-numeric-input">
+                        <h3 class="answer-instruction">הקלד את התשובה המדויקת:</h3>
+                        <div class="input-form glass-card">
+                            <div class="coordinates-input-group">
+                                <span class="coord-label">M (</span>
+                                <div class="input-wrapper">
+                                    <input type="text" class="math-input" id="input-x" placeholder="x" autocomplete="off">
+                                    <span class="glow-border"></span>
+                                </div>
+                                <span class="coord-separator">,</span>
+                                <div class="input-wrapper">
+                                    <input type="text" class="math-input" id="input-y" placeholder="y" autocomplete="off">
+                                    <span class="glow-border"></span>
+                                </div>
+                                <span class="coord-label">)</span>
+                            </div>
+
+                            <!-- Integrated Math Keypad for advanced inputs if needed -->
+                            <div class="math-keypad">
+                                <button class="keypad-btn" data-char="-">-</button>
+                                <button class="keypad-btn" data-char="/">/</button>
+                                <button class="keypad-btn" data-char="√">√</button>
+                                <button class="keypad-btn" data-char="π">π</button>
+                                <button class="keypad-btn" data-char="²">x²</button>
+                                <button class="keypad-btn" id="keypad-clear">נקה</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ================= CONTAINER TYPE C: MATCHING / DRAG & DROP ================= -->
+                    <div class="answer-container hidden" id="mode-drag-drop">
+                        <h3 class="answer-instruction">התאם בין המשוואות לתיאור הגיאומטרי שלהן:</h3>
+                        <div class="matching-layout">
+                            
+                            <!-- Draggable Items (Expressions) -->
+                            <div class="drag-items-column">
+                                <div class="drag-item glass-card" draggable="true" id="drag-item-1">
+                                    <div class="drag-handle"><i data-lucide="grip-vertical"></i></div>
+                                    <span class="drag-content">\(y = 3x - 1\)</span>
+                                </div>
+                                <div class="drag-item glass-card" draggable="true" id="drag-item-2">
+                                    <div class="drag-handle"><i data-lucide="grip-vertical"></i></div>
+                                    <span class="drag-content">\(x^2 + y^2 = 25\)</span>
+                                </div>
+                                <div class="drag-item glass-card" draggable="true" id="drag-item-3">
+                                    <div class="drag-handle"><i data-lucide="grip-vertical"></i></div>
+                                    <span class="drag-content">\(y = x^2 - 4\)</span>
+                                </div>
+                            </div>
+
+                            <!-- Drop Targets (Descriptions) -->
+                            <div class="drop-slots-column">
+                                <div class="matching-row">
+                                    <div class="drop-slot glass-card" data-accepts="drag-item-2">
+                                        <span class="placeholder-text">גרור משוואה מתאימה לכאן</span>
+                                    </div>
+                                    <div class="slot-label-card">
+                                        מעגל קנוני שרדיוסו \(R=5\)
+                                    </div>
+                                </div>
+
+                                <div class="matching-row">
+                                    <div class="drop-slot glass-card" data-accepts="drag-item-1">
+                                        <span class="placeholder-text">גרור משוואה מתאימה לכאן</span>
+                                    </div>
+                                    <div class="slot-label-card">
+                                        ישר עולה בעל שיפוע \(m=3\)
+                                    </div>
+                                </div>
+
+                                <div class="matching-row">
+                                    <div class="drop-slot glass-card" data-accepts="drag-item-3">
+                                        <span class="placeholder-text">גרור משוואה מתאימה לכאן</span>
+                                    </div>
+                                    <div class="slot-label-card">
+                                        פרבולה ישרה עם קודקוד ב-\((0,-4)\)
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+
+                    <!-- ================= CONTAINER TYPE D: STEPS REORDERING ================= -->
+                    <div class="answer-container hidden" id="mode-steps-reorder">
+                        <h3 class="answer-instruction">סדר את שלבי הפתרון של המשוואה לפי הסדר הלוגי הנכון:</h3>
+                        <div class="reorder-list" id="sortable-steps-container">
+                            <!-- Populated dynamically -->
+                        </div>
+                    </div>
+
+                    <!-- Shared Game Action Footer -->
+                    <div class="game-action-footer">
+                        <div class="hint-trigger-wrapper">
+                            <button class="btn-hint" id="btn-show-hint">
+                                <i data-lucide="help-circle"></i>
+                                <span>רמז</span>
+                            </button>
+                            <!-- Elegant Gold Tooltip Card -->
+                            <div class="hint-tooltip-card glass-card hidden" id="hint-tooltip">
+                                <div class="tooltip-header">
+                                    <div class="tooltip-title">
+                                        <i data-lucide="help-circle" class="color-gold"></i>
+                                        <span>רמז זהב</span>
+                                    </div>
+                                    <button class="tooltip-close" id="btn-close-hint">
+                                        <i data-lucide="x"></i>
+                                    </button>
+                                </div>
+                                <div class="tooltip-body">
+                                    <!-- Populated dynamically -->
+                                </div>
+                                <div class="tooltip-arrow"></div>
+                            </div>
+                        </div>
+
+                        <button class="btn-check-answer" id="btn-submit-answer">
+                            <span>בדיקת תשובה</span>
+                            <i data-lucide="arrow-left-circle" class="btn-icon-right"></i>
+                        </button>
+                    </div>
+
+                </section>
+            </div>
+        </main>
+
+        <!-- ================= SCREEN 3: SUMMARY MODAL / VICTORY OVERLAY ================= -->
+        <div id="screen-summary" class="summary-overlay hidden">
+            <div class="summary-modal glass-card">
+                
+                <!-- Victory Celebration Header -->
+                <div class="victory-header">
+                    <div class="victory-crown-glow">
+                        <i data-lucide="crown" class="crown-icon"></i>
+                    </div>
+                    <h2 class="victory-title">השלמת את המשימה!</h2>
+                    <p class="victory-subtitle">עבודה מצוינת! השלמת את השלב בהצלחה.</p>
+                </div>
+
+                <!-- Stats Grid -->
+                <div class="summary-stats-grid">
+                    
+                    <div class="stat-card glass-card">
+                        <span class="stat-label">נקודות ניסיון שנצברו</span>
+                        <div class="stat-main color-purple animate-pulse-glow">
+                            <i data-lucide="sparkles"></i>
+                            <span>+150 XP</span>
+                        </div>
+                    </div>
+
+                    <div class="stat-card glass-card">
+                        <span class="stat-label">זמן פתרון כולל</span>
+                        <div class="stat-main color-cyan">
+                            <i data-lucide="clock"></i>
+                            <span>04:32</span>
+                        </div>
+                    </div>
+
+                    <div class="stat-card glass-card">
+                        <span class="stat-label">מדד דיוק</span>
+                        <div class="stat-main color-green">
+                            <i data-lucide="target"></i>
+                            <span>90%</span>
+                        </div>
+                    </div>
+
+                    <div class="stat-card glass-card">
+                        <span class="stat-label">רצף נוכחי</span>
+                        <div class="stat-main color-orange">
+                            <i data-lucide="flame"></i>
+                            <span>6 ימים</span>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- Achievements Unlocked (Optional / Visual Flair) -->
+                <div class="unlocked-badge-card glass-card" style="display: none;">
+                    <div class="badge-icon-box">
+                        <i data-lucide="shield-check" class="badge-icon"></i>
+                    </div>
+                    <div class="badge-info">
+                        <h5>תג חדש נפתח!</h5>
+                        <p></p>
+                    </div>
+                </div>
+
+                <!-- Action Footer -->
+                <div class="summary-actions">
+                    <button class="btn-secondary" id="btn-summary-map">
+                        <i data-lucide="map"></i>
+                        <span>חזרה למפה</span>
+                    </button>
+                    <button class="btn-primary" id="btn-summary-next">
+                        <span>לשלב הבא</span>
+                        <i data-lucide="chevrons-left"></i>
+                    </button>
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+
+    <!-- ================= CUSTOM MODALS ================= -->
+    <!-- Exit Warning Modal -->
+    <div id="modal-exit-warning" class="custom-modal-overlay hidden">
+        <div class="custom-modal exit-warning glass-card">
+            <div class="custom-modal-header">
+                <div class="custom-modal-icon error-bg">
+                    <i data-lucide="alert-triangle"></i>
+                </div>
+                <h3 class="custom-modal-title">יציאה מהשלב</h3>
+            </div>
+            <div class="custom-modal-body">
+                <p>האם אתה בטוח שברצונך לצאת מהמשחק ולחזור למפת הלמידה?</p>
+                <p style="margin-top: 8px; color: var(--accent-error-light); font-weight: 500;">כל ההתקדמות והניקוד שנצברו בשלב הנוכחי יאבדו!</p>
+            </div>
+            <div class="custom-modal-actions">
+                <button id="btn-exit-confirm" class="btn-primary" style="background: rgba(239, 68, 68, 0.2); border-color: var(--accent-error); color: var(--text-white);">כן, צא ומחק התקדמות</button>
+                <button id="btn-exit-cancel" class="btn-secondary">לא, המשך לשחק</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Coming Soon Modal -->
+    <div id="modal-coming-soon" class="custom-modal-overlay hidden">
+        <div class="custom-modal coming-soon glass-card">
+            <div class="custom-modal-header">
+                <div class="custom-modal-icon info-bg">
+                    <i data-lucide="compass"></i>
+                </div>
+                <h3 class="custom-modal-title">בקרוב מאוד!</h3>
+            </div>
+            <div class="custom-modal-body">
+                <p>אזור זה נמצא כעת בפיתוח ויהיה זמין בגרסה הבאה של המשחק.</p>
+                <p style="margin-top: 8px;">אתה מוזמן להמשיך ללמוד ולפתור משימות במפת הלמידה המאתגרת שלנו!</p>
+            </div>
+            <div class="custom-modal-actions">
+                <button id="btn-coming-soon-close" class="btn-primary">הבנתי, תודה!</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================= Exit Warning Modal ================= -->
+    <div id="modal-exit-warning" class="custom-modal-overlay hidden">
+        <div class="custom-modal-content glass-card">
+            <div class="modal-icon-container warning">
+                <i data-lucide="alert-triangle"></i>
+            </div>
+            <h2>יציאה מהשלב</h2>
+            <p>האם אתה בטוח שברצונך לחזור למפה? התקדמות השלב הנוכחי לא תישמר.</p>
+            <div class="modal-actions">
+                <button class="btn-secondary" id="btn-exit-cancel">המשך לשחק</button>
+                <button class="btn-primary danger-btn" id="btn-exit-confirm">צא מהשלב</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================= Coming Soon Modal ================= -->
+    <div id="modal-coming-soon" class="custom-modal-overlay hidden">
+        <div class="custom-modal-content glass-card">
+            <div class="modal-icon-container info">
+                <i data-lucide="sparkles"></i>
+            </div>
+            <h2>בקרוב מאוד!</h2>
+            <p>אזור זה נמצא כעת בפיתוח ויהיה זמין בגרסה הבאה. בינתיים, המשך לתרגל ולצבור XP במפת הלמידה!</p>
+            <div class="modal-actions">
+                <button class="btn-primary" id="btn-coming-soon-close">הבנתי, תודה</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Game scripts (loaded in dependency order) -->
+    <script src="js/effects.js"></script>
+    <script src="js/questions.js"></script>
+    <script src="js/app.js"></script>
+
+    <!-- Initialize Lucide Icons -->
+    <script>
+        lucide.createIcons();
+    </script>
+</body>
+</html>
