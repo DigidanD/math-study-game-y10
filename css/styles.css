@@ -913,6 +913,12 @@ button {
     overflow: visible;
 }
 
+.graph-svg text {
+    font-size: 14px !important;
+    font-family: 'Rubik', sans-serif !important;
+    text-shadow: 0 0 5px #0a0614, 0 0 10px #0a0614 !important;
+}
+
 .glowing-svg-line {
     filter: drop-shadow(0 0 4px var(--accent-purple-glow));
 }
@@ -1953,6 +1959,32 @@ button {
     .game-action-footer .btn-check-answer,
     .game-action-footer .btn-primary {
         flex: 2;
+    }
+
+    /* Increase SVG text size for readability on mobile */
+    .graph-svg text {
+        font-size: 17px !important;
+        font-weight: 700 !important;
+        text-shadow: 0 0 6px #0a0614, 0 0 12px #0a0614 !important;
+    }
+    
+    .axis-label {
+        font-size: 14px !important;
+        color: rgba(255, 255, 255, 0.6) !important;
+    }
+
+    /* Thicker graph lines on mobile for better visibility */
+    .graph-svg .glowing-svg-line {
+        stroke-width: 4.5px !important;
+    }
+
+    /* Larger interactive dots on mobile */
+    .graph-svg circle {
+        r: 8px !important;
+    }
+    
+    .graph-svg .interactive-dot:hover {
+        r: 11px !important;
     }
 }
 
