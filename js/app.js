@@ -189,24 +189,24 @@ class GameController {
     const toggleWelcomeBtn = document.getElementById('btn-toggle-welcome');
     const welcomeGuideBody = document.getElementById('welcome-guide-body');
     if (toggleWelcomeBtn && welcomeGuideBody) {
-      // Check saved preference
+      // Default to collapsed on mobile (< 650px) if not set yet
+      if (window.innerWidth < 650 && localStorage.getItem('welcome_guide_collapsed') === null) {
+        localStorage.setItem('welcome_guide_collapsed', 'true');
+      }
+      
       const welcomeCollapsed = localStorage.getItem('welcome_guide_collapsed') === 'true';
       if (welcomeCollapsed) {
-        welcomeGuideBody.style.display = 'none';
+        welcomeGuideBody.classList.add('collapsed');
         toggleWelcomeBtn.textContent = 'הצג הנחיות';
+      } else {
+        welcomeGuideBody.classList.remove('collapsed');
+        toggleWelcomeBtn.textContent = 'הסתר הנחיות';
       }
       
       toggleWelcomeBtn.addEventListener('click', () => {
-        const isHidden = welcomeGuideBody.style.display === 'none';
-        if (isHidden) {
-          welcomeGuideBody.style.display = 'grid';
-          toggleWelcomeBtn.textContent = 'הסתר הנחיות';
-          localStorage.setItem('welcome_guide_collapsed', 'false');
-        } else {
-          welcomeGuideBody.style.display = 'none';
-          toggleWelcomeBtn.textContent = 'הצג הנחיות';
-          localStorage.setItem('welcome_guide_collapsed', 'true');
-        }
+        const isCollapsed = welcomeGuideBody.classList.toggle('collapsed');
+        toggleWelcomeBtn.textContent = isCollapsed ? 'הצג הנחיות' : 'הסתר הנחיות';
+        localStorage.setItem('welcome_guide_collapsed', isCollapsed ? 'true' : 'false');
       });
     }
   }
@@ -613,12 +613,19 @@ class GameController {
     if (!tooltip) return;
 
     if (show) {
-      tooltip.classList.remove('hidden');
-      tooltip.style.display = 'block';
       this.renderHintsInTooltip();
+      tooltip.classList.remove('hidden');
+      // Force reflow
+      tooltip.offsetHeight;
+      tooltip.classList.add('active-drawer');
     } else {
-      tooltip.classList.add('hidden');
-      tooltip.style.display = 'none';
+      tooltip.classList.remove('active-drawer');
+      // Wait for CSS transition (300ms) to complete before hiding
+      setTimeout(() => {
+        if (!tooltip.classList.contains('active-drawer')) {
+          tooltip.classList.add('hidden');
+        }
+      }, 300);
     }
   }
 

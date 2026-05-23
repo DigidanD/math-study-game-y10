@@ -1655,21 +1655,128 @@ button {
 }
 
 /* ==========================================================================
+   WELCOME GUIDE PANEL STYLING
+   ========================================================================== */
+.welcome-guide-panel {
+    margin-bottom: 24px;
+    padding: 20px;
+    border-color: rgba(168, 85, 247, 0.3);
+    background: rgba(22, 17, 35, 0.45);
+    border-width: 1px;
+    border-style: solid;
+    border-radius: var(--radius-md);
+    transition: max-height var(--transition-slow), opacity var(--transition-normal), padding var(--transition-normal), margin var(--transition-normal);
+    overflow: hidden;
+    max-height: 800px;
+    opacity: 1;
+}
+
+.welcome-guide-panel.collapsed {
+    max-height: 0;
+    opacity: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+    margin-bottom: 0;
+    border-color: transparent;
+}
+
+.welcome-guide-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+    padding-bottom: 8px;
+}
+
+.welcome-guide-header h3 {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--accent-cyan-light);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0;
+}
+
+.welcome-guide-header .btn-icon {
+    padding: 4px 10px;
+    font-size: 12px;
+    background: rgba(255,255,255,0.05);
+    border-radius: 6px;
+    cursor: pointer;
+    border: 1px solid var(--border-glass);
+    color: var(--text-white);
+    transition: background var(--transition-fast), border-color var(--transition-fast);
+}
+
+.welcome-guide-header .btn-icon:hover {
+    background: rgba(255,255,255,0.1);
+    border-color: var(--accent-purple);
+}
+
+#welcome-guide-body {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    transition: all var(--transition-normal) ease;
+}
+
+#welcome-guide-body.collapsed {
+    display: none !important;
+}
+
+.guide-col {
+    text-align: right;
+}
+
+.guide-col h4 {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--accent-purple-light);
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 0;
+}
+
+.guide-col:last-child h4 {
+    color: var(--accent-warning);
+}
+
+.guide-col ul {
+    list-style: none;
+    padding-right: 0;
+    margin: 0;
+    font-size: 13px;
+    color: var(--text-muted);
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+/* ==========================================================================
    RESPONSIVE LAYOUTS (MEDIA QUERIES)
    ========================================================================== */
 
 @media (max-width: 1024px) {
     .map-layout {
-        grid-template-columns: 1fr;
+        display: flex;
+        flex-direction: column;
         height: auto;
-    }
-    
-    .map-content {
-        height: 600px;
     }
     
     .map-sidebar {
+        order: -1; /* Sidebar first on top */
+        width: 100%;
         height: auto;
+        padding: 16px;
+    }
+    
+    .map-content {
+        order: 1; /* Map on bottom */
+        height: 600px;
     }
     
     .gameplay-grid {
@@ -1683,6 +1790,21 @@ button {
 }
 
 @media (max-width: 650px) {
+    /* Welcome Guide Accordion Mobile Overrides */
+    .welcome-guide-panel #welcome-guide-body {
+        grid-template-columns: 1fr;
+        gap: 16px;
+    }
+    
+    .map-content {
+        height: auto;
+        padding: 16px;
+    }
+    
+    .map-path-container {
+        min-height: 500px; /* Compact map height on mobile */
+    }
+
     .app-header {
         grid-template-columns: 1fr;
         gap: 16px;
@@ -1735,6 +1857,33 @@ button {
     .summary-actions button {
         width: 100%;
     }
+    
+    /* Gameplay Mobile Reductions */
+    .graphic-canvas-wrapper {
+        height: 180px; /* Reduced graph height from 260px */
+    }
+    
+    .game-visuals-panel {
+        padding: 12px;
+        gap: 8px;
+    }
+    
+    .question-text {
+        font-size: 16px;
+    }
+    
+    .choice-card {
+        padding: 10px 14px;
+    }
+    
+    .choice-math {
+        font-size: 15px;
+    }
+    
+    /* Scroll padding to avoid sticky footer coverage */
+    .game-answer-panel {
+        padding-bottom: 95px;
+    }
 
     .matching-layout {
         grid-template-columns: 1fr;
@@ -1752,15 +1901,58 @@ button {
         height: 48px;
     }
     
+    /* Bottom Sheet Drawer for mobile tooltips */
     .hint-tooltip-card {
-        width: 280px;
+        position: fixed;
+        bottom: 0;
         left: 0;
-        right: auto;
+        right: 0;
+        width: 100% !important;
+        border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+        transform: translateY(100%);
+        transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.3s ease;
+        z-index: 2000;
+        box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.6);
+        background: rgba(15, 10, 25, 0.95) !important;
+        border-top: 1px solid var(--accent-warning);
+        padding: 20px 24px calc(20px + env(safe-area-inset-bottom)) 24px;
+    }
+    
+    .hint-tooltip-card.active-drawer {
+        transform: translateY(0);
     }
     
     .hint-tooltip-card .tooltip-arrow {
-        right: auto;
-        left: 28px;
+        display: none !important;
+    }
+    
+    /* Sticky bottom action bar */
+    .game-action-footer {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: rgba(10, 6, 20, 0.92);
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+        border-top: 1px solid var(--border-glass);
+        padding: 14px 20px calc(10px + env(safe-area-inset-bottom)) 20px;
+        z-index: 1000;
+        box-shadow: 0 -8px 32px rgba(0, 0, 0, 0.7);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 12px;
+    }
+    
+    .game-action-footer .hint-trigger-wrapper,
+    .game-action-footer .btn-hint {
+        flex: 1;
+    }
+    
+    .game-action-footer .btn-check-answer,
+    .game-action-footer .btn-primary {
+        flex: 2;
     }
 }
 
